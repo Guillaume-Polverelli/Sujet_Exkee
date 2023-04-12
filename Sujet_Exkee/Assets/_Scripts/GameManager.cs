@@ -15,6 +15,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject[] _spawnLocations;
     [SerializeField] private GameGrid _board;
+    [SerializeField] private AIMove _aiMove;
+
+    private GameObject fallingPiece;
+    private int AiPosition;
 
     private bool _isPlayerTurn = true;
 
@@ -44,44 +48,78 @@ public class GameManager : MonoBehaviour
 
     public void HoverColumn(int column)
     {
-        if (_isPlayerTurn)
+        if(_board.IsColumnNotFull(column) && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero))
         {
-            _player1Ghost.SetActive(true);
-            _player1Ghost.transform.position = _spawnLocations[column].transform.position;
-        }
-        else
-        {
-            _player2Ghost.SetActive(true);
-            _player2Ghost.transform.position = _spawnLocations[column].transform.position;
+            if (_isPlayerTurn)
+            {
+                _player1Ghost.SetActive(true);
+                _player1Ghost.transform.position = _spawnLocations[column].transform.position;
+            }
+            else
+            {
+                _player2Ghost.SetActive(true);
+                _player2Ghost.transform.position = _spawnLocations[column].transform.position;
 
+            }
         }
     }
 
 
     public void SelectColumn(int column)
     {
-        Debug.Log("GameManager column : " + column);
-        PlayerTurn(column);
+        if(fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero)
+        {
+            PlayerTurn(column);
+        }
     }
 
     private void PlayerTurn(int column)
     {
-
+        if (!_isPlayerTurn)
+        {
+            column = _aiMove.GetBestMove(_board.GetBoardState());
+        }
         if(_board.UpdateBoardState(column, _isPlayerTurn))
         {
             if (_isPlayerTurn)
             {
-                Instantiate(_player1, _spawnLocations[column].transform.position, Quaternion.Euler(new Vector3(90, 0, 0)));
+                fallingPiece = Instantiate(_player1, _spawnLocations[column].transform.position, Quaternion.Euler(new Vector3(90, 0, 0)));
+                fallingPiece.GetComponent<Rigidbody>().velocity = new Vector3(0, 0.1f, 0);
                 _isPlayerTurn = !_isPlayerTurn;
                 _player1Ghost.SetActive(false);
+
+                if (DidWin(1)){
+                    Debug.Log("Player 1 has won !");
+                }
             }
             else
             {
-                Instantiate(_player2, _spawnLocations[column].transform.position, Quaternion.Euler(new Vector3(90, 0, 0)));
+                fallingPiece = Instantiate(_player2, _spawnLocations[column].transform.position, Quaternion.Euler(new Vector3(90, 0, 0)));
+                fallingPiece.GetComponent<Rigidbody>().velocity = new Vector3(0, 0.1f, 0);
                 _isPlayerTurn = !_isPlayerTurn;
                 _player2Ghost.SetActive(false);
 
+                if (DidWin(2))
+                {
+                    Debug.Log("Player 2 has won !");
+                }
             }
         }
+    }
+
+    private bool DidWin(int player)
+    {
+        //Horizontal
+        for(int x = 0; x < _board.GetWidth() - 3; x++)
+        {
+            for(int y = 0; y < _board.GetHeight(); y++)
+            {
+                if(_board.GetBoardState()[y, x] == player && _board.GetBoardState()[y, x+1] == player && _board.GetBoardState()[y, x+2] == player && _board.GetBoardState()[y, x+3] == player)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

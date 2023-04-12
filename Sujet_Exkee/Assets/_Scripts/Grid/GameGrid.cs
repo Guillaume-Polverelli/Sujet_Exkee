@@ -26,6 +26,23 @@ public class GameGrid : MonoBehaviour
         _boardState = new int[_heightOfBoard, _widthOfBoard];
     }
 
+    public int[,] GetBoardState()
+    {
+        return _boardState;
+    }
+    public int GetWidth()
+    {
+        return _widthOfBoard;
+    }
+    public int GetHeight()
+    {
+        return _heightOfBoard;
+    }
+
+    public bool IsColumnNotFull(int column) {
+        return _boardState[_heightOfBoard - 1, column] == 0;
+    }
+
     public bool UpdateBoardState(int column, bool isPlayerTurn)
     {
         for(int row = 0; row < _heightOfBoard; row++)
