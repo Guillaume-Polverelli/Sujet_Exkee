@@ -45,6 +45,11 @@ public class GameGrid : MonoBehaviour
 
     public bool UpdateBoardState(int column, bool isPlayerTurn)
     {
+        if (column == -1)
+        {
+            Debug.Log("La partie est finie");
+            return false;
+        }
         for(int row = 0; row < _heightOfBoard; row++)
         {
             if(_boardState[row, column] == 0)

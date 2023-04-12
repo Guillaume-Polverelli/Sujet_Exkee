@@ -17,10 +17,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameGrid _board;
     [SerializeField] private AIMove _aiMove;
 
+    private const int ROWS = 6;
+    private const int COLS = 7;
+    private const int WIN_LENGTH = 4;
+
     private GameObject fallingPiece;
     private int AiPosition;
 
-    private bool _isPlayerTurn = true;
+    private bool _isPlayerTurn = false;
 
     public void Awake()
     {
@@ -88,7 +92,8 @@ public class GameManager : MonoBehaviour
                 _isPlayerTurn = !_isPlayerTurn;
                 _player1Ghost.SetActive(false);
 
-                if (DidWin(1)){
+                if (WinningMove(_board.GetBoardState(), 1))
+                {
                     Debug.Log("Player 1 has won !");
                 }
             }
@@ -99,7 +104,7 @@ public class GameManager : MonoBehaviour
                 _isPlayerTurn = !_isPlayerTurn;
                 _player2Ghost.SetActive(false);
 
-                if (DidWin(2))
+                if (WinningMove(_board.GetBoardState(), 2))
                 {
                     Debug.Log("Player 2 has won !");
                 }
@@ -107,14 +112,50 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private bool DidWin(int player)
+    public bool WinningMove(int[,] board, int player)
     {
-        //Horizontal
-        for(int x = 0; x < _board.GetWidth() - 3; x++)
+        // Check rows
+        for (int row = 0; row < ROWS; row++)
         {
-            for(int y = 0; y < _board.GetHeight(); y++)
+            for (int col = 0; col <= COLS - WIN_LENGTH; col++)
             {
-                if(_board.GetBoardState()[y, x] == player && _board.GetBoardState()[y, x+1] == player && _board.GetBoardState()[y, x+2] == player && _board.GetBoardState()[y, x+3] == player)
+                if (board[row, col] == player && board[row, col + 1] == player && board[row, col + 2] == player && board[row, col + 3] == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check columns
+        for (int row = 0; row <= ROWS - WIN_LENGTH; row++)
+        {
+            for (int col = 0; col < COLS; col++)
+            {
+                if (board[row, col] == player && board[row + 1, col] == player && board[row + 2, col] == player && board[row + 3, col] == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check diagonals (positive slope)
+        for (int row = 0; row <= ROWS - WIN_LENGTH; row++)
+        {
+            for (int col = 0; col <= COLS - WIN_LENGTH; col++)
+            {
+                if (board[row, col] == player && board[row + 1, col + 1] == player && board[row + 2, col + 2] == player && board[row + 3, col + 3] == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check diagonals (negative slope)
+        for (int row = 0; row <= ROWS - WIN_LENGTH; row++)
+        {
+            for (int col = WIN_LENGTH - 1; col < COLS; col++)
+            {
+                if (board[row, col] == player && board[row + 1, col - 1] == player && board[row + 2, col - 2] == player && board[row + 3, col - 3] == player)
                 {
                     return true;
                 }
