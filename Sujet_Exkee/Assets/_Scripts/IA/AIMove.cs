@@ -9,8 +9,6 @@ public class AIMove : MonoBehaviour
     private const int WIN_LENGTH = 4;
     private int currentPlayer = 1; // player1 starts
 
-    [SerializeField] private GameManager _gameManager;
-
     // ...
 
     private bool IsValidLocation(int[,] board, int column)
@@ -21,28 +19,17 @@ public class AIMove : MonoBehaviour
     private int[] ValidLocations(int[,] board)
     {
 
-        /*int[] validLocations = new int[COLS];
+        //int count = 0;
+        List<int> valid = new List<int>();
         for(int col = 0; col < COLS; col++)
         {
-            if (IsValidLocation(board, col))
-            {
-                validLocations[col] = 1;
-            }
-            else validLocations[col] = 0;
+            if (IsValidLocation(board, col)) valid.Add(col);
         }
 
-        return validLocations;*/
-        int count = 0;
-        //List<int> valid = new List<int>();
-        for(int col = 0; col < COLS; col++)
-        {
-            if (IsValidLocation(board, col)) count++;
-        }
+        int[] valid_locations = valid.ToArray();
+        return valid_locations;
 
-        int[] valid_locations = new int[count];
-        count = 0;
-
-        for (int col = 0; col < COLS; col++)
+        /*for (int col = 0; col < COLS; col++)
         {
             if (IsValidLocation(board, col))
             {
@@ -51,7 +38,7 @@ public class AIMove : MonoBehaviour
                 count++;
             }
         }
-        return valid_locations;
+        return valid_locations;*/
  
     }
 
@@ -72,6 +59,57 @@ public class AIMove : MonoBehaviour
         return board[ROWS - 1, column] != 0;
     }
 
+    private bool WinningMove(int[,] board, int player)
+    {
+        // Check rows
+        for (int row = 0; row < ROWS; row++)
+        {
+            for (int col = 0; col <= COLS - WIN_LENGTH; col++)
+            {
+                if (board[row, col] == player && board[row, col + 1] == player && board[row, col + 2] == player && board[row, col + 3] == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check columns
+        for (int row = 0; row <= ROWS - WIN_LENGTH; row++)
+        {
+            for (int col = 0; col < COLS; col++)
+            {
+                if (board[row, col] == player && board[row + 1, col] == player && board[row + 2, col] == player && board[row + 3, col] == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check diagonals (positive slope)
+        for (int row = 0; row <= ROWS - WIN_LENGTH; row++)
+        {
+            for (int col = 0; col <= COLS - WIN_LENGTH; col++)
+            {
+                if (board[row, col] == player && board[row + 1, col + 1] == player && board[row + 2, col + 2] == player && board[row + 3, col + 3] == player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Check diagonals (negative slope)
+        for (int row = 0; row <= ROWS - WIN_LENGTH; row++)
+        {
+            for (int col = WIN_LENGTH - 1; col < COLS; col++)
+            {
+                if (board[row, col] == player && board[row + 1, col - 1] == player && board[row + 2, col - 2] == player && board[row + 3, col - 3] == player)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     private int EvaluateWindow(int startRow, int startCol, int deltaRow, int deltaCol, int[,] board, int player)
     {
@@ -188,7 +226,7 @@ public class AIMove : MonoBehaviour
 
     private bool IsTerminalNode(int[,] board)
     {
-        return _gameManager.WinningMove(board, 1) || _gameManager.WinningMove(board, 2) || ValidLocations(board).Count() == 0;
+        return WinningMove(board, 1) || WinningMove(board, 2) || ValidLocations(board).Count() == 0;
     }
 
     private int[] Minimax(int depth, int alpha, int beta, bool maximizingPlayer, int[,] board)
@@ -208,12 +246,12 @@ public class AIMove : MonoBehaviour
             
             if (isTerminal)
             {
-                if (_gameManager.WinningMove(board, 2))
+                if (WinningMove(board, 2))
                 {
                     int[] val = { -1, int.MaxValue };
                     return val;
                 }
-                else if (_gameManager.WinningMove(board, 1))
+                else if (WinningMove(board, 1))
                 {
                     int[] val = { -1, int.MinValue };
                     return val;

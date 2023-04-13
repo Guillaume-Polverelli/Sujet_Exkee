@@ -21,7 +21,7 @@ public class GameGrid : MonoBehaviour
     [SerializeField] private int _widthOfBoard;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         _boardState = new int[_heightOfBoard, _widthOfBoard];
     }
@@ -43,6 +43,16 @@ public class GameGrid : MonoBehaviour
         return _boardState[_heightOfBoard - 1, column] == 0;
     }
 
+    public int GetLastRowNotEmpty(int column)
+    {
+        if (_boardState[0, column] == 0) return 0;
+        for (int row = 1; row < _heightOfBoard; row++)
+        {
+            if (_boardState[row, column] == 0) return row - 1;
+        }
+        return _heightOfBoard - 1;
+    }
+
     public bool UpdateBoardState(int column, bool isPlayerTurn)
     {
         if (column == -1)
@@ -62,7 +72,6 @@ public class GameGrid : MonoBehaviour
                 {
                     _boardState[row, column] = 2;
                 }
-                Debug.Log("Piece being spawned at (" + row + " , " + column + ")");
                 return true;
             }   
         }
