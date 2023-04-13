@@ -8,4 +8,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: 1b083b2efe41ff14a908c222e18e4664
+  - enabled: 1
+    path: Assets/Scenes/GamePvP.unity
+    guid: ced7c7379e4bedd45a796c64d86469ac
+  - enabled: 1
+    path: Assets/Scenes/GameVsIA.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
   m_configObjects: {}

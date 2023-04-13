@@ -14,9 +14,14 @@ public class MainMenu : MonoBehaviour
         Debug.Assert(_helpWindow != null);
     }
 
-    public void StartGame()
+    public void StartGamePvp()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
+
+    public void StartGameAI()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 2);
     }
 
     public void NewGameButton()

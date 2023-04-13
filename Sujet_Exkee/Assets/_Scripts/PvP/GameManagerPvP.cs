@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManagerPvP : MonoBehaviour
 {
 
-    public static GameManager Instance;
+    public static GameManagerPvP Instance;
 
     [SerializeField] private GameObject _player1;
     [SerializeField] private GameObject _player2;
@@ -15,7 +15,6 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject[] _spawnLocations;
     [SerializeField] private GameGrid _board;
-    [SerializeField] private AIMove _aiMove;
 
     private const int ROWS = 6;
     private const int COLS = 7;
@@ -25,7 +24,7 @@ public class GameManager : MonoBehaviour
     private GameObject fallingPiece;
     private GameObject[,] _piecePositions;
 
-    private bool _isPlayerTurn = false;
+    private bool _isPlayerTurn = true;
     private bool _hasGameEnded = false;
 
     public void Awake()
@@ -52,18 +51,34 @@ public class GameManager : MonoBehaviour
         _player2Ghost.SetActive(false);
 
         _piecePositions = new GameObject[ROWS, COLS];
+    }
 
-        StartCoroutine(PlayIACoroutine());
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            MenuHandler.Instance.HandlePauseInput();
+            if (MenuHandler.Instance.getPause())
+            {
+                _player1Ghost.SetActive(false);
+                _player2Ghost.SetActive(false);
+            }
+        }
     }
 
     public void HoverColumn(int column)
     {
-        if(_board.IsColumnNotFull(column) && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !_hasGameEnded)
+        if(_board.IsColumnNotFull(column) && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !_hasGameEnded && !MenuHandler.Instance.getPause())
         {
             if (_isPlayerTurn)
             {
                 _player1Ghost.SetActive(true);
                 _player1Ghost.transform.position = _spawnLocations[column].transform.position;
+            }
+            else
+            {
+                _player2Ghost.SetActive(true);
+                _player2Ghost.transform.position = _spawnLocations[column].transform.position;
             }
         }
     }
@@ -71,7 +86,7 @@ public class GameManager : MonoBehaviour
 
     public void SelectColumn(int column)
     {
-        if(_isPlayerTurn && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero))
+        if((fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !MenuHandler.Instance.getPause())
         {
             PlayerTurn(column);
         }
@@ -80,41 +95,27 @@ public class GameManager : MonoBehaviour
     private void PlayerTurn(int column)
     {
         if (!_hasGameEnded && _board.UpdateBoardState(column, _isPlayerTurn))
-        {           
-              fallingPiece = Instantiate(_player1, _spawnLocations[column].transform.position, Quaternion.Euler(new Vector3(90, 0, 0)));
-              _piecePositions[_board.GetLastRowNotEmpty(column), column] = fallingPiece;
-              fallingPiece.GetComponent<Rigidbody>().velocity = new Vector3(0, 0.1f, 0);
-              _isPlayerTurn = !_isPlayerTurn;
-              _player1Ghost.SetActive(false);
-
-              if (DidWin(_board.GetBoardState(), 1))
-              {
-                  _hasGameEnded = true;
-                  Debug.Log("Player 1 won !");
-              }
-              else if (DidDraw(_board.GetBoardState()))
-              {
-                  Debug.Log("Draw !");
-              }
-
-              StartCoroutine(PlayIACoroutine()); 
-        }
-    }
-    
-    IEnumerator PlayIACoroutine()
-    {
-        if (!_hasGameEnded)
         {
-            int column = _aiMove.GetBestMove(_board.GetBoardState());
-            if (_board.UpdateBoardState(column, _isPlayerTurn))
+            if (_isPlayerTurn)
             {
+                fallingPiece = Instantiate(_player1, _spawnLocations[column].transform.position, Quaternion.Euler(new Vector3(90, 0, 0)));
+                _piecePositions[_board.GetLastRowNotEmpty(column), column] = fallingPiece;
+                fallingPiece.GetComponent<Rigidbody>().velocity = new Vector3(0, 0.1f, 0);
+                _isPlayerTurn = !_isPlayerTurn;
+                _player1Ghost.SetActive(false);
 
-                yield return new WaitForSeconds(2);
-                _player2Ghost.SetActive(true);
-                _player2Ghost.transform.position = _spawnLocations[column].transform.position;
-
-                yield return new WaitForSeconds(0.7f);
-
+                if (DidWin(_board.GetBoardState(), 1))
+                {
+                    _hasGameEnded = true;
+                    Debug.Log("Player 1 won !");
+                }
+                else if (DidDraw(_board.GetBoardState()))
+                {
+                    Debug.Log("Draw !");
+                }
+            }
+            else
+            {
                 fallingPiece = Instantiate(_player2, _spawnLocations[column].transform.position, Quaternion.Euler(new Vector3(90, 0, 0)));
                 _piecePositions[_board.GetLastRowNotEmpty(column), column] = fallingPiece;
                 fallingPiece.GetComponent<Rigidbody>().velocity = new Vector3(0, 0.1f, 0);

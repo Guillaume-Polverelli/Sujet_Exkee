@@ -7,9 +7,6 @@ public class AIMove : MonoBehaviour
     private const int ROWS = 6;
     private const int COLS = 7;
     private const int WIN_LENGTH = 4;
-    private int currentPlayer = 1; // player1 starts
-
-    // ...
 
     private bool IsValidLocation(int[,] board, int column)
     {
