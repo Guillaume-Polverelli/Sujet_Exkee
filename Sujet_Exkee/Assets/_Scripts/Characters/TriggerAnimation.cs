@@ -25,7 +25,6 @@ public class TriggerAnimation : MonoBehaviour
         while (true)
         {
             _animator.SetTrigger("IsThinking");
-            print("Doing Stuff" + Time.time);
             yield return new WaitForSeconds(_time);
         }
     }

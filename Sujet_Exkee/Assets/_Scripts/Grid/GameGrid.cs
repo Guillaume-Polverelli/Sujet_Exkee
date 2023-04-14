@@ -57,7 +57,6 @@ public class GameGrid : MonoBehaviour
     {
         if (column == -1)
         {
-            Debug.Log("La partie est finie");
             return false;
         }
         for(int row = 0; row < _heightOfBoard; row++)
@@ -75,7 +74,6 @@ public class GameGrid : MonoBehaviour
                 return true;
             }   
         }
-        Debug.LogWarning("Column : " + column + " is full");
         return false;
     }
 }

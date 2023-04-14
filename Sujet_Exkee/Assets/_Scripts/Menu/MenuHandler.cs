@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.Assertions;
 
 public class MenuHandler : MonoBehaviour
 {
@@ -25,6 +26,12 @@ public class MenuHandler : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        Assert.IsNotNull(pauseMenu);
+        Assert.IsNotNull(victoryMenu);
+    }
+
     public bool getPause()
     {
         return isPaused;
@@ -33,8 +40,6 @@ public class MenuHandler : MonoBehaviour
     public void HandlePauseInput()
     {
         if (victoryMenu.activeInHierarchy) return;
-
-        print("HandlePauseInput");
 
         if (isPaused)
         {
@@ -50,27 +55,23 @@ public class MenuHandler : MonoBehaviour
     {
         pauseMenu.SetActive(true);
         PauseGame();
-        print("ShowPauseScreen");
     }
 
     public void HidePauseScreen()
     {
         pauseMenu.SetActive(false);
-        print("HidePauseScreen");
         ResumeGame();
     }
 
     private void ResumeGame()
     {
         isPaused = false;
-        print("ResumeGame");
         Time.timeScale = 1;
     }
 
     private void PauseGame()
     {
         isPaused = true;
-        print("PauseGame");
         Time.timeScale = 0;
     }
     public void LoadMainMenu()

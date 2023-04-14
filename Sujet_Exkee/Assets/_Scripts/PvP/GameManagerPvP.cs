@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class GameManagerPvP : MonoBehaviour
 {
@@ -41,11 +42,14 @@ public class GameManagerPvP : MonoBehaviour
             Instance = this;
         }
 
-        Debug.Assert(_player1 != null);
-        Debug.Assert(_player2 != null);
-        Debug.Assert(_player1Ghost != null);
-        Debug.Assert(_player2Ghost != null);
-        Debug.Assert(_board != null);
+        Assert.IsNotNull(_player1);
+        Assert.IsNotNull(_player2);
+        Assert.IsNotNull(_player1Ghost);
+        Assert.IsNotNull(_player2Ghost);
+        Assert.IsNotNull(_spawnLocations);
+        Assert.IsNotNull(_board);
+        Assert.IsNotNull(_animator);
+        Assert.IsNotNull(_confettis);
     }
 
     private void Start()
