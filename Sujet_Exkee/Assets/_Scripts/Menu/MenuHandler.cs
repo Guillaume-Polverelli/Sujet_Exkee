@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class MenuHandler : MonoBehaviour
 {
@@ -74,18 +75,26 @@ public class MenuHandler : MonoBehaviour
     }
     public void LoadMainMenu()
     {
+        Time.timeScale = 1;
         SceneManager.LoadScene(0);
     }
 
     public void RestartGame()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         Time.timeScale = 1;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    public void ShowVictoryScreen()
+    public void ShowVictoryScreen(int player)
     {
         victoryMenu.SetActive(true);
-        PauseGame();
+        if(player == 0)
+        {
+            victoryMenu.transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().SetText("C'est un draw ! ");
+        }
+        else
+        {
+            victoryMenu.transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().SetText("Joueur " + player + " emporte la partie !");
+        }  
     }
 }

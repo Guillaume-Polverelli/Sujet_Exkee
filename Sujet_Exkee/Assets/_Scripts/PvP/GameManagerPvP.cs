@@ -16,16 +16,19 @@ public class GameManagerPvP : MonoBehaviour
     [SerializeField] private GameObject[] _spawnLocations;
     [SerializeField] private GameGrid _board;
 
+    [SerializeField] private Animator _animator;
+    [SerializeField] private GameObject _confettis;
+
     private const int ROWS = 6;
     private const int COLS = 7;
     private const int WIN_LENGTH = 4;
-
 
     private GameObject fallingPiece;
     private GameObject[,] _piecePositions;
 
     private bool _isPlayerTurn = true;
     private bool _hasGameEnded = false;
+    private bool _isAnimation = false;
 
     public void Awake()
     {
@@ -68,7 +71,7 @@ public class GameManagerPvP : MonoBehaviour
 
     public void HoverColumn(int column)
     {
-        if(_board.IsColumnNotFull(column) && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !_hasGameEnded && !MenuHandler.Instance.getPause())
+        if(_board.IsColumnNotFull(column) && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !_hasGameEnded && !MenuHandler.Instance.getPause() && !_isAnimation)
         {
             if (_isPlayerTurn)
             {
@@ -86,7 +89,7 @@ public class GameManagerPvP : MonoBehaviour
 
     public void SelectColumn(int column)
     {
-        if((fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !MenuHandler.Instance.getPause())
+        if((fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !MenuHandler.Instance.getPause() && !_isAnimation)
         {
             PlayerTurn(column);
         }
@@ -107,11 +110,16 @@ public class GameManagerPvP : MonoBehaviour
                 if (DidWin(_board.GetBoardState(), 1))
                 {
                     _hasGameEnded = true;
-                    Debug.Log("Player 1 won !");
+                    MenuHandler.Instance.ShowVictoryScreen(1);
+                    _confettis.SetActive(true);
                 }
                 else if (DidDraw(_board.GetBoardState()))
                 {
-                    Debug.Log("Draw !");
+                    MenuHandler.Instance.ShowVictoryScreen(0);
+                }
+                else
+                {
+                    StartCoroutine(ChangePlayerCoroutine());
                 }
             }
             else
@@ -125,14 +133,36 @@ public class GameManagerPvP : MonoBehaviour
                 if (DidWin(_board.GetBoardState(), 2))
                 {
                     _hasGameEnded = true;
-                    Debug.Log("Player 2 won !");
+                    MenuHandler.Instance.ShowVictoryScreen(2);
+                    _confettis.SetActive(true);
                 }
                 else if (DidDraw(_board.GetBoardState()))
                 {
-                    Debug.Log("Draw !");
+                    MenuHandler.Instance.ShowVictoryScreen(0);
+                }
+                else
+                {
+                    StartCoroutine(ChangePlayerCoroutine());
                 }
             }
         }
+    }
+
+    IEnumerator ChangePlayerCoroutine()
+    {
+        _isAnimation = true;
+        yield return new WaitForSeconds(1f);
+
+        if (!_isPlayerTurn)
+        {
+            _animator.SetTrigger("ChangePlayer");
+        }
+        else _animator.SetTrigger("ChangePlayer2");
+
+        yield return new WaitForSeconds(2f);
+
+        _isAnimation = false;
+
     }
 
     private bool DidWin(int[,] board, int player)

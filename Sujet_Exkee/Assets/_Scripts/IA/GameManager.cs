@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class GameManager : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameGrid _board;
     [SerializeField] private AIMove _aiMove;
 
+    [SerializeField] private Animator _animator;
+    [SerializeField] private GameObject _confettis;
+
     private const int ROWS = 6;
     private const int COLS = 7;
     private const int WIN_LENGTH = 4;
@@ -27,6 +31,7 @@ public class GameManager : MonoBehaviour
 
     private bool _isPlayerTurn = false;
     private bool _hasGameEnded = false;
+    private bool _isAnimation = false;
 
     public void Awake()
     {
@@ -39,11 +44,15 @@ public class GameManager : MonoBehaviour
             Instance = this;
         }
 
-        Debug.Assert(_player1 != null);
-        Debug.Assert(_player2 != null);
-        Debug.Assert(_player1Ghost != null);
-        Debug.Assert(_player2Ghost != null);
-        Debug.Assert(_board != null);
+        Assert.IsNotNull(_player1);
+        Assert.IsNotNull(_player2);
+        Assert.IsNotNull(_player1Ghost);
+        Assert.IsNotNull(_player2Ghost);
+        Assert.IsNotNull(_spawnLocations);
+        Assert.IsNotNull(_board);
+        Assert.IsNotNull(_aiMove);
+        Assert.IsNotNull(_animator);
+        Assert.IsNotNull(_confettis);
     }
 
     private void Start()
@@ -71,7 +80,7 @@ public class GameManager : MonoBehaviour
 
     public void HoverColumn(int column)
     {
-        if(_board.IsColumnNotFull(column) && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !_hasGameEnded && !MenuHandler.Instance.getPause())
+        if(_board.IsColumnNotFull(column) && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !_hasGameEnded && !MenuHandler.Instance.getPause() && !_isAnimation)
         {
             if (_isPlayerTurn)
             {
@@ -84,7 +93,7 @@ public class GameManager : MonoBehaviour
 
     public void SelectColumn(int column)
     {
-        if(_isPlayerTurn && !MenuHandler.Instance.getPause() && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero))
+        if(_isPlayerTurn && !MenuHandler.Instance.getPause() && (fallingPiece == null || fallingPiece.GetComponent<Rigidbody>().velocity == Vector3.zero) && !_isAnimation)
         {
             PlayerTurn(column);
         }
@@ -103,14 +112,19 @@ public class GameManager : MonoBehaviour
               if (DidWin(_board.GetBoardState(), 1))
               {
                   _hasGameEnded = true;
-                  Debug.Log("Player 1 won !");
-              }
+                  MenuHandler.Instance.ShowVictoryScreen(1);
+                _confettis.SetActive(true);
+            }
               else if (DidDraw(_board.GetBoardState()))
               {
-                  Debug.Log("Draw !");
+                MenuHandler.Instance.ShowVictoryScreen(0);
+            }
+              else
+              {
+                StartCoroutine(ChangePlayerCoroutine());
               }
 
-              StartCoroutine(PlayIACoroutine()); 
+           
         }
     }
     
@@ -137,14 +151,41 @@ public class GameManager : MonoBehaviour
                 if (DidWin(_board.GetBoardState(), 2))
                 {
                     _hasGameEnded = true;
-                    Debug.Log("Player 2 won !");
+                    MenuHandler.Instance.ShowVictoryScreen(2);
+                    _confettis.SetActive(true);
                 }
                 else if (DidDraw(_board.GetBoardState()))
                 {
-                    Debug.Log("Draw !");
+                    MenuHandler.Instance.ShowVictoryScreen(0);
+                }
+                else
+                {
+                    StartCoroutine(ChangePlayerCoroutine());
                 }
             }
         }
+    }
+
+    IEnumerator ChangePlayerCoroutine()
+    {
+        _isAnimation = true;
+        yield return new WaitForSeconds(1f);
+
+        if (!_isPlayerTurn)
+        {
+            _animator.SetTrigger("ChangePlayer2");
+        }
+        else _animator.SetTrigger("ChangePlayer");
+
+        yield return new WaitForSeconds(2f);
+
+        _isAnimation = false;
+
+        if (!_isPlayerTurn)
+        {
+            StartCoroutine(PlayIACoroutine());
+        }
+
     }
 
     private bool DidWin(int[,] board, int player)

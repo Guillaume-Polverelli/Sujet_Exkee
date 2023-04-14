@@ -15,8 +15,6 @@ public class AIMove : MonoBehaviour
 
     private int[] ValidLocations(int[,] board)
     {
-
-        //int count = 0;
         List<int> valid = new List<int>();
         for(int col = 0; col < COLS; col++)
         {
@@ -25,17 +23,6 @@ public class AIMove : MonoBehaviour
 
         int[] valid_locations = valid.ToArray();
         return valid_locations;
-
-        /*for (int col = 0; col < COLS; col++)
-        {
-            if (IsValidLocation(board, col))
-            {
-                valid_locations[count] = col;
-                //Debug.Log(valid_locations[count]);
-                count++;
-            }
-        }
-        return valid_locations;*/
  
     }
 
@@ -140,35 +127,26 @@ public class AIMove : MonoBehaviour
             }
 
         }
-
-        if (count_player == 4) score += 100;
-        else if (count_player == 3 && count_empty == 1) score += 5;
-        else if (count_player == 2 && count_empty == 2) score += 2;
-        if (count_opp == 3 && count_empty == 1) score -= 4;
-
-        return score;
-
-        /*if (player2Count == WIN_LENGTH)
+        if (player == 2)
         {
-            return int.MaxValue;
-        }
-        else if (player1Count == WIN_LENGTH - 1)
-        {
-            return int.MinValue;
+            if (count_player == 4) score += 10000;
+            else if (count_player == 3 && count_empty == 1) score += 100;
+            else if (count_player == 2 && count_empty == 2) score += 10;
+            if (count_opp == 2 && count_empty == 2) score -= 10;
+            else if (count_opp == 3 && count_empty == 1) score -= 100;
+            else if (count_opp == 4) score -= 10000;
         }
         else
         {
-            int score =  player2Count - player1Count;
-            if (player1Count > 0 && player2Count > 0)
-            {
-                score = 0; // La fenêtre n'a aucune valeur si elle contient des jetons des deux joueurs
-            }
-            if (player1Count > 0)
-            {
-                score *= -1; // Inverse le score si la fenêtre contient des jetons de l'adversaire
-            }
-            return score;
-        }*/
+            if (count_player == 4) score -= 10000;
+            else if (count_player == 3 && count_empty == 1) score -= 100;
+            else if (count_player == 2 && count_empty == 2) score -= 10;
+            if (count_opp == 2 && count_empty == 2) score += 10;
+            else if (count_opp == 3 && count_empty == 1) score += 100;
+            else if (count_opp == 4) score += 10000;
+        }
+
+        return score;
     }
 
     private int EvaluateBoard(int[,] board, int player)
@@ -228,13 +206,7 @@ public class AIMove : MonoBehaviour
 
     private int[] Minimax(int depth, int alpha, int beta, bool maximizingPlayer, int[,] board)
     {
-        
-        //if(score == int.MinValue) Debug.Log(score);
 
-        /*if (depth == 0 || score == int.MaxValue || score == int.MinValue)
-        {
-            return score;
-        }*/
 
         bool isTerminal = IsTerminalNode(board);
 
@@ -310,39 +282,6 @@ public class AIMove : MonoBehaviour
             int[] val = { column, score };
             return val;
         }
-
-        /*int bestScore = maximizingPlayer ? int.MinValue : int.MaxValue;
-
-        for (int col = 0; col < COLS; col++)
-        {
-            if (!IsColumnFull(col, board))
-            {
-                int row = GetNextEmptyRow(col, board);
-                board[row, col] = maximizingPlayer ? 2 : 1;
-
-                int[] childScore = Minimax(depth - 1, alpha, beta, !maximizingPlayer, board);
-
-                if (maximizingPlayer)
-                {
-                    bestScore = Mathf.Max(bestScore, childScore[1]);
-                    alpha = Mathf.Max(alpha, childScore[1]);
-                }
-                else
-                {
-                    bestScore = Mathf.Min(bestScore, childScore[1]);
-                    beta = Mathf.Min(beta, childScore[1]);
-                }
-
-                board[row, col] = 0;
-
-                if (beta <= alpha)
-                {
-                    break;
-                }
-            }
-        }
-
-        return bestScore;*/
     }
 
     public int GetBestMove(int[,] board)
@@ -351,36 +290,5 @@ public class AIMove : MonoBehaviour
         int[] value_minimax = Minimax(6, int.MinValue, int.MaxValue, true, board);
 
         return value_minimax[0];
-
-        /*int bestScore = int.MinValue;
-        List<int> bestMoves = new List<int>();
-
-
-        for (int col = 0; col < COLS; col++)
-        {
-            if (!IsColumnFull(col, board))
-            {
-                
-                int row = GetNextEmptyRow(col, board);
-                board[row, col] = 2;
-
-                int score = Minimax(7, int.MinValue, int.MaxValue, true, board); // depth of 4
-
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    bestMoves.Clear();
-                    bestMoves.Add(col);
-                }
-                else if (score == bestScore)
-                {
-                    bestMoves.Add(col);
-                }
-
-                board[row, col] = 0;
-            }
-        }
-
-        return bestMoves[Random.Range(0, bestMoves.Count)];*/
     }
 }
